@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import org.apache.commons.csv.CSVParser;
@@ -33,23 +34,49 @@ public class CsvUtils {
     }
 
     public String cleanColumnName(String columnName) {
-        return columnName.trim().replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "");
+        System.out.println("berfore cleanig: " + columnName);
+        String columnCleaned = columnName.trim().replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "");
+        System.out.println("After cleaning: " + columnCleaned);
+        return columnCleaned;
+       
     }
 
-public static String[] readSampleRow(String filePath) throws IOException {
-    try (Reader reader = new FileReader(filePath);
-         CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+    public static String[] readSampleRow(String filePath, char delimiter) throws IOException {
+        CSVFormat format = CSVFormat.DEFAULT
+                .withDelimiter(delimiter)
+                .withFirstRecordAsHeader()
+                .withQuote('"');
+    
+        try (Reader reader = new FileReader(filePath);
+             CSVParser csvParser = new CSVParser(reader, format)) {
+          //  System.out.println("Headers on readSampleRow method : " + csvParser.getHeaderNames() + ", Headers amount : " + csvParser.getHeaderNames().size());
 
-        CSVRecord firstRecord = csvParser.getRecords().get(0);
-        String[] sampleRow = new String[firstRecord.size()];
-
-        for (int i = 0; i < firstRecord.size(); i++) {
-            sampleRow[i] = firstRecord.get(i);
+            CSVRecord firstRecord = csvParser.getRecords().get(0);
+            String[] sampleRow = new String[firstRecord.size()];
+            for (int i = 0; i < firstRecord.size(); i++) {
+                sampleRow[i] = firstRecord.get(i);
+            }
+    
+            return sampleRow;
         }
-        return sampleRow;
     }
-    }
+    
+    
+    
 
+public static char inferDelimiter(String filePath) throws IOException {
+    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        String headerLine = br.readLine();
+        if (headerLine != null) {
+            if (headerLine.contains(";")) {
+                return ';';
+            } else if (headerLine.contains(",")) {
+                return ',';
+            }
+        }
+    }
+    return ';'; 
+}
 
 
     private static boolean isBoolean(String value) {
