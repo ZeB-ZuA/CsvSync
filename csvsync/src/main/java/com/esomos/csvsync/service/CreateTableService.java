@@ -67,9 +67,9 @@ public class CreateTableService {
     
     
 
-    public void insertData(String[] headers, String[] data, String filePath) {
+    public void insertData(String[] headers, String[] data, String filePath, int rowCount) throws IOException {
         String schemaName = obtainTableName(filePath);
-        String queryDemo = "";
+      
         //System.out.println("Headers on insertData method: " + Arrays.toString(headers) + ", Headers amount: " + headers.length);
         StringBuilder sqlInsert = new StringBuilder("INSERT INTO ");
         sqlInsert.append(schemaName).append(".").append(schemaName).append(" (");
@@ -91,11 +91,13 @@ public class CreateTableService {
         try {
             jdbcTemplate.update(sqlInsert.toString());
             System.out.println("Data inserted successfully into: " + schemaName + "." + schemaName);
-            queryDemo = sqlInsert.toString();
+            
         } catch (Exception e) {
             System.err.println("Error inserting data: " + e.getMessage());
         }
-        System.out.println("Query demo: " + queryDemo);
+       
+
+
     }
 
     private String obtainTableName(String filePath) {
