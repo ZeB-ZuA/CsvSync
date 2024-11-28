@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,7 +13,7 @@ import java.io.IOException;
 import org.apache.commons.csv.CSVParser;
 
 import java.io.Reader;
-
+@Component
 public class CsvUtils {
 
     public String inferDataType(String value) {

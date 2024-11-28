@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import com.esomos.csvsync.service.CsvProcessorService;
@@ -16,8 +18,10 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class FolderMonitorConfig {
 
+    @Autowired
     private final CsvProcessorService csvProcessorService;
 
+    @Autowired
     public FolderMonitorConfig(CsvProcessorService csvProcessorService) {
         this.csvProcessorService = csvProcessorService;
     }
@@ -39,7 +43,7 @@ public class FolderMonitorConfig {
                     System.out.println("new file: " + event.context().toString());
                     String fileName = event.context().toString();
                     if (fileName.endsWith(".csv")) {
-                        csvProcessorService.processCsv(Paths.get(path.toString(), fileName).toString());
+                        csvProcessorService.processCsv(Paths.get(path.toString(), fileName).toString().toLowerCase());
                     }
                 }
             }
