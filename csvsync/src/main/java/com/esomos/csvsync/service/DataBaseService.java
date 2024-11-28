@@ -6,18 +6,33 @@ import java.util.Arrays;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+
 import com.esomos.csvsync.cvsUtils.CsvUtils;
 
 @Service
-public class CreateTableService {
+
+public class DataBaseService {
 
     private final JdbcTemplate jdbcTemplate;
     private final CsvUtils csvUtils = new CsvUtils();
 
-    public CreateTableService(JdbcTemplate jdbcTemplate) {
+    public DataBaseService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
 
     }
+
+
+    public void createDatabase(String dbName) {
+        try {
+          
+            String createDbSQL = "CREATE DATABASE IF NOT EXISTS " + dbName;
+            jdbcTemplate.execute(createDbSQL);
+            System.out.println("Base de datos " + dbName + " creada exitosamente.");
+        } catch (Exception e) {
+            System.err.println("Error al crear la base de datos: " + e.getMessage());
+        }
+    }
+
 
     public void createTable(String[] headers, String filePath) {
         System.out.println("Headers on createTable method: " + Arrays.toString(headers) + ", Headers amount: " + headers.length);
@@ -100,8 +115,9 @@ public class CreateTableService {
 
     }
 
-    private String obtainTableName(String filePath) {
+    public String obtainTableName(String filePath) {
         return filePath.substring(filePath.lastIndexOf("\\") + 1, filePath.lastIndexOf(".")).replaceAll("[^a-zA-Z0-9]",
                 "_");
     }
+
 }
