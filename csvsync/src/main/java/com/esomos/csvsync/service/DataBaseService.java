@@ -1,11 +1,8 @@
 package com.esomos.csvsync.service;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -25,7 +22,7 @@ public class DataBaseService {
     private final String dbPassword;
     private final String dbPort;
 
-    @Autowired
+  
     public DataBaseService(JdbcTemplate jdbcTemplate, 
                            @Value("${spring.datasource.url}") String dbUrl,
                            @Value("${spring.datasource.username}") String dbUsername,
