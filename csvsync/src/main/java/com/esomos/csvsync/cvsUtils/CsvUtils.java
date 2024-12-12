@@ -35,9 +35,9 @@ public class CsvUtils {
     }
 
     public String cleanColumnName(String columnName) {
-        System.out.println("berfore cleanig: " + columnName);
+        //System.out.println("berfore cleanig: " + columnName);
         String columnCleaned = columnName.trim().replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "");
-        System.out.println("After cleaning: " + columnCleaned);
+        //System.out.println("After cleaning: " + columnCleaned);
         return columnCleaned;
        
     }

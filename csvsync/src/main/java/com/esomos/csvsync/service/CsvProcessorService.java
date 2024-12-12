@@ -64,12 +64,15 @@ public class CsvProcessorService {
             System.err.println("Error creating the database: " + e.getMessage());
             throw e;
         }
-        System.out.println("Summary:");
+        /*
+          System.out.println("Summary:");
         System.out.println("Total rows from CSV: " + rowCount);
         System.out.println("Rows inserted: " + rowsInserted);
         System.out.println("Delimiter: " + delimiter);
         System.out.println("Sample row: " + Arrays.toString(CsvUtils.readSampleRow(filePath, delimiter)));
         System.out.println("Headers: " + Arrays.toString(cleanedHeaders));
+         */
+        
     }
 
     private int countRows(String filePath, char delimiter) throws IOException, CsvValidationException {
