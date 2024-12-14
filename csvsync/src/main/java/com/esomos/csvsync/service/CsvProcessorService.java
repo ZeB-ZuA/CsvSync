@@ -11,10 +11,9 @@ import com.esomos.csvsync.cvsUtils.CsvUtils;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import com.opencsv.exceptions.CsvValidationException;
+
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 @Service
