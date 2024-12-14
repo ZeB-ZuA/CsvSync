@@ -1,7 +1,10 @@
 package com.esomos.csvsync.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,33 +68,25 @@ public class DataBaseService {
     }
 
     public void createTable(String[] headers, String filePath) {
-        // Obtener el nombre de la tabla desde el archivo (sin esquema)
         String tableName = obtainTableName(filePath);
-        
-        // Construir la sentencia SQL para la creación de la tabla
         StringBuilder sqlTable = new StringBuilder("CREATE TABLE IF NOT EXISTS ");
         sqlTable.append(tableName).append(" (");
     
         try {
-            // Inferir el delimitador del archivo CSV
             char delimiter = CsvUtils.inferDelimiter(filePath);
-            // Leer una fila de muestra del archivo CSV para inferir los tipos de datos
             String[] sampleRow = CsvUtils.readSampleRow(filePath, delimiter);
-    
-            // Iterar sobre los encabezados y los valores de la fila para crear las columnas de la tabla
+
             for (int i = 0; i < headers.length; i++) {
                 String header = headers[i];
                 String inferredType = csvUtils.inferDataType(sampleRow[i]);
     
-                // Agregar cada columna con su tipo de dato a la sentencia SQL
                 sqlTable.append(header).append(" ").append(inferredType).append(", ");
             }
     
-            // Eliminar la última coma de la sentencia SQL
+   
             sqlTable.setLength(sqlTable.length() - 2);
             sqlTable.append(");");
     
-            // Ejecutar la sentencia SQL para crear la tabla
             jdbcTemplate.execute(sqlTable.toString());
             System.out.println("Table created successfully: " + tableName);
         } catch (IOException e) {
@@ -101,41 +96,75 @@ public class DataBaseService {
         }
     }
     
-    
 
-    public void insertData(String[] headers, String[] data, String filePath, int rowCount) throws IOException {
-        // Obtener el nombre de la tabla desde el archivo (sin esquema)
+    public void insertBatch(String[] headers, List<String[]> dataBatch, String filePath, String[] columnTypes) {
         String tableName = obtainTableName(filePath);
-    
         StringBuilder sqlInsert = new StringBuilder("INSERT INTO ");
         sqlInsert.append(tableName).append(" (");
     
-        // Agregar los nombres de las columnas a la sentencia SQL
+        // Agregar los nombres de las columnas al SQL
         for (String header : headers) {
-            String cleanHeader = header;
-            sqlInsert.append(cleanHeader).append(", ");
+            sqlInsert.append(header).append(", ");
         }
         sqlInsert.setLength(sqlInsert.length() - 2); // Eliminar la última coma
-        sqlInsert.append(") VALUES (");
+        sqlInsert.append(") VALUES ");
     
-        // Agregar los valores a la sentencia SQL
-        for (String value : data) {
-            sqlInsert.append("'").append(value.replace("'", "''")).append("', ");
+        // Construir los placeholders para las filas
+        String placeholders = "(" + String.join(", ", Collections.nCopies(headers.length, "?")) + ")";
+        sqlInsert.append(placeholders); // Añadir placeholders
+        sqlInsert.append(";");
+    
+        // Crear la lista de parámetros para cada fila en el lote
+        List<Object[]> batchParams = new ArrayList<>();
+        for (String[] row : dataBatch) {
+            Object[] batchRow = new Object[row.length];
+    
+            for (int i = 0; i < row.length; i++) {
+                // Convertir el valor según el tipo inferido
+                batchRow[i] = convertToProperType(row[i], columnTypes[i]);
+            }
+    
+            batchParams.add(batchRow);
         }
-        sqlInsert.setLength(sqlInsert.length() - 2); // Eliminar la última coma
-        sqlInsert.append(");");
     
         try {
-            // Ejecutar la sentencia SQL para insertar los datos
-            jdbcTemplate.update(sqlInsert.toString());
-            System.out.println("Data inserted successfully into: " + tableName);
+            // Ejecutar el batch con JdbcTemplate
+            int[] rowsInserted = jdbcTemplate.batchUpdate(sqlInsert.toString(), batchParams);
+            System.out.println("Batch insert completed. Rows inserted: " + Arrays.stream(rowsInserted).sum());
         } catch (Exception e) {
-            logger.error("Error inserting data into '{}': {}", tableName, e.getMessage(), e);
+            logger.error("Error performing batch insert into '{}': {}", tableName, e.getMessage(), e);
+            throw e;
         }
     }
     
 
+    
     public String obtainTableName(String filePath) {
         return filePath.substring(filePath.lastIndexOf("\\") + 1, filePath.lastIndexOf(".")).replaceAll("[^a-zA-Z0-9]", "_");
     }
+
+    private Object convertToProperType(String value, String columnType) {
+        switch (columnType.toUpperCase()) {
+            case "INTEGER":
+            case "INT":
+                return Integer.parseInt(value); // Convertir a Integer
+            case "BOOLEAN":
+                return Boolean.parseBoolean(value); // Convertir a Boolean
+            case "DATE":
+                return java.sql.Date.valueOf(value); // Convertir a Date (en formato YYYY-MM-DD)
+            case "TIME":
+                return java.sql.Time.valueOf(value); // Convertir a Time (en formato HH:MM:SS)
+            case "TIMESTAMP":
+                return java.sql.Timestamp.valueOf(value); // Convertir a Timestamp
+            case "DOUBLE PRECISION":
+            case "DECIMAL":
+                return Double.parseDouble(value); // Convertir a Double
+            case "TEXT":
+            case "VARCHAR":
+                return value; // Dejar como String
+            default:
+                throw new IllegalArgumentException("Unsupported column type: " + columnType);
+        }
+    }
+    
 }
