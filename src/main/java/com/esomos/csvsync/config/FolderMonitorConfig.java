@@ -25,9 +25,9 @@ public class FolderMonitorConfig {
     private final DatabaseConnectionManager connectionManager;
 
     private final List<String> folderPaths = List.of(
-            "C:\\Users\\User\\Desktop\\mnto",
-            "C:\\Users\\User\\Desktop\\ti",
-            "C:\\Users\\User\\Desktop\\sgv"
+            "C:\\Users\\TI\\Desktop\\mnto",
+            "C:\\Users\\TI\\Desktop\\ti",
+            "C:\\Users\\TI\\Desktop\\sgv"
     );
 
     public FolderMonitorConfig(CsvProcessorService csvProcessorService, DatabaseConnectionManager connectionManager) {
@@ -38,9 +38,20 @@ public class FolderMonitorConfig {
     @PostConstruct
     public void init() throws Exception {
         startFolderMonitor();
+   
     }
 
     public void startFolderMonitor() throws Exception {
+        Runtime runtime = Runtime.getRuntime();
+		long totalMemory = runtime.totalMemory(); // Memoria total asignada a la JVM
+		long freeMemory = runtime.freeMemory();   // Memoria libre dentro de la JVM
+		long usedMemory = totalMemory - freeMemory; // Memoria usada por la JVM
+
+		System.out.println("========== Memory Usage ==========");
+		System.out.println("Total Memory: " + (totalMemory / 1024 / 1024) + " MB");
+		System.out.println("Free Memory: " + (freeMemory / 1024 / 1024) + " MB");
+		System.out.println("Used Memory: " + (usedMemory / 1024 / 1024) + " MB");
+		System.out.println("=================================");
         WatchService watchService = FileSystems.getDefault().newWatchService();
 
         for (String folderPath : folderPaths) {
