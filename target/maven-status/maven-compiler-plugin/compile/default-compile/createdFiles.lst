@@ -1,7 +1,0 @@
-com\esomos\csvsync\config\DatabaseConfig.class
-com\esomos\csvsync\service\DataBaseService.class
-com\esomos\csvsync\config\FolderMonitorConfig.class
-com\esomos\csvsync\cvsUtils\CsvUtils.class
-com\esomos\csvsync\CsvsyncApplication.class
-com\esomos\csvsync\service\CsvProcessorService.class
-com\esomos\csvsync\service\DatabaseConnectionManager.class

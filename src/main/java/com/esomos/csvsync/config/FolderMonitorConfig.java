@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.esomos.csvsync.service.CsvProcessorService;
 import com.esomos.csvsync.service.DatabaseConnectionManager;
+import com.esomos.csvsync.service.SqlProcessorService;
 
 import jakarta.annotation.PostConstruct;
 
@@ -22,6 +23,7 @@ import jakarta.annotation.PostConstruct;
 public class FolderMonitorConfig {
 
     private final CsvProcessorService csvProcessorService;
+    private final SqlProcessorService sqlProcessorService;
     private final DatabaseConnectionManager connectionManager;
 
     private final List<String> folderPaths = List.of(
@@ -30,9 +32,10 @@ public class FolderMonitorConfig {
             "C:\\Users\\TI\\Desktop\\sgv"
     );
 
-    public FolderMonitorConfig(CsvProcessorService csvProcessorService, DatabaseConnectionManager connectionManager) {
+    public FolderMonitorConfig(CsvProcessorService csvProcessorService, DatabaseConnectionManager connectionManager, SqlProcessorService sqlProcessorService) {
         this.csvProcessorService = csvProcessorService;
         this.connectionManager = connectionManager;
+        this.sqlProcessorService = sqlProcessorService;
     }
 
     @PostConstruct
@@ -43,9 +46,9 @@ public class FolderMonitorConfig {
 
     public void startFolderMonitor() throws Exception {
         Runtime runtime = Runtime.getRuntime();
-		long totalMemory = runtime.totalMemory(); // Memoria total asignada a la JVM
-		long freeMemory = runtime.freeMemory();   // Memoria libre dentro de la JVM
-		long usedMemory = totalMemory - freeMemory; // Memoria usada por la JVM
+		long totalMemory = runtime.totalMemory(); 
+		long freeMemory = runtime.freeMemory();   
+		long usedMemory = totalMemory - freeMemory; 
 
 		System.out.println("========== Memory Usage ==========");
 		System.out.println("Total Memory: " + (totalMemory / 1024 / 1024) + " MB");
@@ -70,18 +73,37 @@ public class FolderMonitorConfig {
                     if (fullPath.toString().endsWith(".csv")) {
                         handleNewCsvFile(fullPath);
                     }
+                    if(fullPath.toString().endsWith(".sql")) 
+                        handleNewSqlFile(fullPath);
+                    }
                 }
             }
             key.reset();
         }
+    
+
+
+    private void handleNewSqlFile(Path fullPath) {
+        try {
+            String folderPath = fullPath.getParent().toString();
+            connectionManager.changeInstanceBasedOnFolder(folderPath);
+            Map<String, String> dbInfo = connectionManager.getDatabaseInfo();
+            System.out.println("Current connection: " + dbInfo);
+            sqlProcessorService.processSql(fullPath.toString().toLowerCase());
+        } catch (Exception e) {
+            System.err.println("Error procesando el archivo: " + fullPath + " - " + e.getMessage());
+            e.printStackTrace();
     }
+}
+
+
 
     private void handleNewCsvFile(Path fullPath) {
         try {
             String folderPath = fullPath.getParent().toString();
             connectionManager.changeInstanceBasedOnFolder(folderPath);
             Map<String, String> dbInfo = connectionManager.getDatabaseInfo();
-            System.out.println("Conexión actual: " + dbInfo);
+            System.out.println("Current connection: " + dbInfo);
             csvProcessorService.processCsv(fullPath.toString().toLowerCase());
         } catch (Exception e) {
             System.err.println("Error procesando el archivo: " + fullPath + " - " + e.getMessage());

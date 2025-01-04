@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.4</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<version>3.4.1</version>
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.esomos</groupId>
 	<artifactId>csvsync</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>csvsync</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
@@ -19,6 +18,12 @@
 	</properties>
 	<packaging>jar</packaging>
 	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -70,7 +75,7 @@
 		</dependency>
 	</dependencies>
 
-<build>
+	<build>
     <plugins>
         <plugin>
             <groupId>org.springframework.boot</groupId>
@@ -84,11 +89,10 @@
                 </execution>
             </executions>
             <configuration>
-                <mainClass>com.esomos.csvsync.CsvsyncApplication</mainClass> <!-- Asegúrate de que esta sea la clase principal -->
+                <mainClass>com.esomos.csvsync.CsvsyncApplication</mainClass>
             </configuration>
         </plugin>
     </plugins>
 </build>
-
 
 </project>
