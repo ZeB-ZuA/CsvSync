@@ -38,16 +38,21 @@ public class DatabaseConnectionManager {
 
     // Cambiar la conexión a la base de datos
     public void changeDBConnection(String host, String port, String username, String password, String database) {
-        String dbUrl = "jdbc:postgresql://" + host + ":" + port + "/" + database;
-
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl(dbUrl);
-        dataSource.setUsername(username);
-        dataSource.setPassword(password);
-
-        jdbcTemplate.setDataSource(dataSource);
-        System.out.println("Conexión cambiada a la base de datos: " + database);
+        try {
+            String dbUrl = "jdbc:postgresql://" + host + ":" + port + "/" + database;
+    
+            DriverManagerDataSource dataSource = new DriverManagerDataSource();
+            dataSource.setDriverClassName("org.postgresql.Driver");
+            dataSource.setUrl(dbUrl);
+            dataSource.setUsername(username);
+            dataSource.setPassword(password);
+    
+            jdbcTemplate.setDataSource(dataSource);
+            System.out.println("Conexión cambiada a la base de datos: " + database);
+        } catch (Exception e) {
+            System.err.println("Error al cambiar la conexión a la base de datos: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // Obtener la información de la base de datos actual
