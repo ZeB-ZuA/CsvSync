@@ -101,7 +101,7 @@ public class FolderMonitorConfig {
                     System.out.println("Conexión actualizada: " + dbInfo);
         
                     // Procesar archivo SQL
-                   // sqlProcessorService.processSql(fullPath.toString());
+                    sqlMntoProcessorService.procesMntoSql(fullPath.toString());
                 } else {
                     // Si el archivo no está en la carpeta "Costos2025", se podría registrar
                     System.out.println("Archivo .sql detectado fuera de 'Costos2025': " + fullPath);
