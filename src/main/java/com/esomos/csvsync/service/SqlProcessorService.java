@@ -5,21 +5,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class SqlProcessorService {
 
+    public void processSql(String filePath) throws Exception {
 
+    }
 
-
-
-public void processSql(String filePath) throws Exception {
-
-}
-
-
-
-
-
-
-
-
-
-    
 }

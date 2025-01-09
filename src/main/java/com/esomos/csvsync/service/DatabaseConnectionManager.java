@@ -8,17 +8,23 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
 
 import com.esomos.csvsync.config.DatabaseConfig;
+
+import lombok.Getter;
+import lombok.Setter;
+
 @Service
+@Getter
+@Setter
 public class DatabaseConnectionManager {
 
     private final JdbcTemplate jdbcTemplate;
 
-    // Los datos de conexión son definidos de forma estática, de acuerdo con las carpetas
+    // Los datos de conexión son definidos de forma estática, de acuerdo con las
+    // carpetas
     private final Map<String, DatabaseConfig> databaseConfigMap = Map.of(
             "mnto", new DatabaseConfig("localhost", "5433", "mnto", "1234", "postgres"),
             "ti", new DatabaseConfig("localhost", "5434", "ti", "1234", "postgres"),
-            "sgv", new DatabaseConfig("localhost", "5435", "sgv", "1234", "postgres")
-    );
+            "sgv", new DatabaseConfig("localhost", "5435", "sgv", "1234", "postgres"));
 
     public DatabaseConnectionManager(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -29,7 +35,8 @@ public class DatabaseConnectionManager {
         for (String folderKey : databaseConfigMap.keySet()) {
             if (folderPath.contains(folderKey)) {
                 DatabaseConfig config = databaseConfigMap.get(folderKey);
-                changeDBConnection(config.getHost(), config.getPort(), config.getUsername(), config.getPassword(), config.getDatabase());
+                changeDBConnection(config.getHost(), config.getPort(), config.getUsername(), config.getPassword(),
+                        config.getDatabase());
                 return;
             }
         }
@@ -40,13 +47,13 @@ public class DatabaseConnectionManager {
     public void changeDBConnection(String host, String port, String username, String password, String database) {
         try {
             String dbUrl = "jdbc:postgresql://" + host + ":" + port + "/" + database;
-    
+
             DriverManagerDataSource dataSource = new DriverManagerDataSource();
             dataSource.setDriverClassName("org.postgresql.Driver");
             dataSource.setUrl(dbUrl);
             dataSource.setUsername(username);
             dataSource.setPassword(password);
-    
+
             jdbcTemplate.setDataSource(dataSource);
             System.out.println("Conexión cambiada a la base de datos: " + database);
         } catch (Exception e) {
@@ -76,7 +83,8 @@ public class DatabaseConnectionManager {
                 return config;
             }
         }
-        throw new IllegalArgumentException("No se pudo encontrar la configuración de la base de datos para el puerto: " + port);
+        throw new IllegalArgumentException(
+                "No se pudo encontrar la configuración de la base de datos para el puerto: " + port);
     }
-}
 
+}

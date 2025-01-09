@@ -46,7 +46,7 @@ public class DataBaseService {
         }
     }
 
-     public void changeDBconnection(String dbName) {
+    public void changeDBconnection(String dbName) {
         try {
             // Obtener la información actual de la base de datos
             Map<String, String> dbInfo = getCurrentDatabaseInfo();
@@ -56,7 +56,8 @@ public class DataBaseService {
             DatabaseConfig config = connectionManager.getDatabaseConfigByPort(currentPort);
 
             // Cambiar la conexión a la nueva base de datos
-            connectionManager.changeDBConnection(config.getHost(), config.getPort(), config.getUsername(), config.getPassword(), dbName);
+            connectionManager.changeDBConnection(config.getHost(), config.getPort(), config.getUsername(),
+                    config.getPassword(), dbName);
 
             System.out.println("Conexión cambiada a la base de datos: " + dbName);
         } catch (Exception e) {
