@@ -1,8 +1,12 @@
 package com.esomos.csvsync.mnto.service;
 
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,33 +24,31 @@ public class SqlMntoProcessorService {
     }
 
     public void procesMntoSql(String filePath) throws Exception {
-        try {
-            // Leer el contenido del archivo con codificación Windows-1252 (ANSI)
-            String content = Files.readString(Paths.get(filePath), Charset.forName("Windows-1252"));
+        Path file = Paths.get(filePath);
 
-            // Usar expresión regular para encontrar cadenas entre comillas simples
-            Pattern pattern = Pattern.compile("'([^']*)'"); // Encuentra cadenas dentro de comillas simples
+        try {
+            waitForFileRelease(file);
+
+    
+            String content = Files.readString(file, Charset.forName("Windows-1252"));
+
+            Pattern pattern = Pattern.compile("'([^']*)'"); 
             Matcher matcher = pattern.matcher(content);
 
-            // Reemplazar cualquier punto y coma dentro de las comillas simples por un guion
             StringBuffer sb = new StringBuffer();
             while (matcher.find()) {
-                // Reemplazamos los puntos y coma dentro de las cadenas encontradas por un guion
                 String updated = matcher.group(1).replace(";", "-");
                 matcher.appendReplacement(sb, "'" + updated + "'");
             }
             matcher.appendTail(sb);
-
-            // Obtener el contenido procesado sin los puntos y coma dentro de comillas
             content = sb.toString();
 
-            // Buscar el nombre de la tabla en el CREATE TABLE
             Pattern createTablePattern = Pattern.compile("CREATE TABLE\\s+(\\w+)\\s*\\(", Pattern.CASE_INSENSITIVE);
             Matcher createTableMatcher = createTablePattern.matcher(content);
 
             String originalTableName = null;
             if (createTableMatcher.find()) {
-                originalTableName = createTableMatcher.group(1); // Captura el nombre de la tabla
+                originalTableName = createTableMatcher.group(1);
                 System.out.println("Table name found: " + originalTableName);
             }
 
@@ -54,29 +56,53 @@ public class SqlMntoProcessorService {
                 throw new Exception("Table name not found in the file.");
             }
 
-            // Reemplazar el nombre de la tabla en los INSERT INTO
             content = content.replaceAll("(?i)INSERT INTO\\s+" + originalTableName, "INSERT INTO costos2025");
 
-            // Eliminar el CREATE TABLE
             content = content.replaceAll("(?is)CREATE TABLE.*?\\);", "");
 
-            // Reemplazar las comas decimales con puntos
             content = content.replaceAll("(\\d+),(\\d+)", "$1.$2");
-            // Eliminar los milisegundos de las fechas
+
             content = content.replace(" 0:0:0.000", "");
 
-            // Guardar el contenido procesado en el mismo archivo
-            Files.writeString(Paths.get(filePath), content, Charset.forName("Windows-1252"));
 
-            System.out.println("File processed successfully: " + filePath);
+            Files.writeString(file, content, Charset.forName("Windows-1252"));
+
+            System.out.println("Archivo procesado exitosamente: " + filePath);
 
         } catch (java.io.IOException e) {
-            System.err.println("File I/O error: " + e.getMessage());
+            System.err.println("Error de lectura/escritura: " + e.getMessage());
             e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("Error processing SQL: " + e.getMessage());
+            System.err.println("Error al procesar el archivo SQL: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Método para esperar hasta que un archivo deje de estar bloqueado.
+     * 
+     * @param filePath Ruta del archivo que se debe desbloquear.
+     * @throws InterruptedException Si el hilo es interrumpido.
+     */
+    private void waitForFileRelease(Path filePath) throws InterruptedException {
+        int retryCount = 0;
+        int maxRetries = 50;
+        long waitInterval = 1000; 
+
+        while (retryCount < maxRetries) {
+            try {
+                try (FileChannel channel = FileChannel.open(filePath, StandardOpenOption.READ)) {
+                    System.out.println("El archivo está desbloqueado: " + filePath);
+                    return; 
+                }
+            } catch (IOException e) {
+                System.out.println("El archivo está bloqueado, reintentando...");
+                retryCount++;
+                Thread.sleep(waitInterval);
+            }
+        }
+
+        throw new RuntimeException("El archivo sigue bloqueado después de múltiples intentos: " + filePath);
     }
 
 }
