@@ -43,17 +43,19 @@ public class SqlUtils {
                         currentBatch.append(valuesPart);
                         batchCount++;
                     } else {
-                        batchedInserts.add("INSERT INTO costos2025 " + columns + " VALUES " + currentBatch.toString() + ";");
-                        currentBatch.setLength(0); 
-                        currentBatch.append(valuesPart); 
-                        batchCount = 1; 
+                        // Construir un INSERT batch con ON CONFLICT DO NOTHING
+                        batchedInserts.add("INSERT INTO costos2025 " + columns + " VALUES " + currentBatch.toString() + " ON CONFLICT (ref_id) DO NOTHING;");
+                        currentBatch.setLength(0);
+                        currentBatch.append(valuesPart);
+                        batchCount = 1;
                         totalBatches++;
                     }
                 }
             }
     
+            // Agregar el último batch pendiente
             if (currentBatch.length() > 0) {
-                batchedInserts.add("INSERT INTO costos2025 " + columns + " VALUES " + currentBatch.toString() + ";");
+                batchedInserts.add("INSERT INTO costos2025 " + columns + " VALUES " + currentBatch.toString() + " ON CONFLICT (ref_id) DO NOTHING;");
                 totalBatches++;
             }
     
@@ -65,6 +67,7 @@ public class SqlUtils {
                 currentBatchIndex++;
                 System.out.println("Lote " + currentBatchIndex + " de " + totalBatches + " procesado.");
             }
+    
             jdbcTemplate.execute("SELECT update_ubicacion2_and_tipo_before_insert_fuc();");
             System.out.println("Inserciones completas.");
         } catch (IOException e) {
@@ -72,5 +75,6 @@ public class SqlUtils {
             throw e;
         }
     }
+    
     
 }
