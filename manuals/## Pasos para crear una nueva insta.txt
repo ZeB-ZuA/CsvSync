@@ -1,0 +1,51 @@
+## Pasos para crear una nueva instancia de PostgreSQL en Linux:
+
+1. Crear un directorio para la nueva instancia:
+   sudo mkdir /home/dataserver/PostgresSQL/mi_instancia_5434
+
+2. Cambiar la propiedad del directorio:
+   sudo chown -R postgres:postgres /home/dataserver/PostgresSQL/mi_instancia_5434
+ 
+
+3. Inicializar la nueva instancia de PostgreSQL:
+   sudo -u postgres /usr/lib/postgresql/15/bin/initdb -D /home/dataserver/PostgresSQL/mi_instancia_5434 --auth=trust --username=postgres
+
+4. Configurar el puerto para la nueva instancia:
+   sudo nano /home/dataserver/PostgresSQL/mi_instancia_5434/postgresql.conf
+
+5. Crear un archivo de servicio para la nueva instancia:
+   sudo nano /etc/systemd/system/nuevaInstancia-5434.service
+
+   [Unit]
+   Description=PostgreSQL Database Server for mi_instancia_5434
+   Documentation=man:postgres(5) man:pg_ctl(1)
+   After=network.target
+
+   [Service]
+   Type=forking
+   User=postgres
+   ExecStart=/usr/lib/postgresql/15/bin/pg_ctl start -D /home/dataserver/PostgresSQL/mi_instancia_5434 -l /home/dataserver/PostgresSQL/mi_instancia_5434/logfile -o "-p 5434"
+   ExecStop=/usr/lib/postgresql/15/bin/pg_ctl stop -D /home/dataserver/PostgresSQL/mi_instancia_5434
+   ExecReload=/usr/lib/postgresql/15/bin/pg_ctl reload -D /home/dataserver/PostgresSQL/mi_instancia_5434
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+   Luego, recarga el `systemd` y habilita el servicio para que inicie automáticamente:
+
+   sudo systemctl daemon-reload
+   sudo systemctl enable postgresql-5434
+   ```
+
+6. Iniciar la nueva instancia de PostgreSQL:
+   sudo systemctl start postgresql-5434
+  
+
+7. Verificar que la nueva instancia esté funcionando:
+
+     sudo systemctl status postgresql-5434
+
+8. Conectar a la nueva instancia:
+   psql -h localhost -U postgres -p 5434 -d postgres
+

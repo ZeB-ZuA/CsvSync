@@ -1,0 +1,107 @@
+# Bitácora de comandos para la gestión de PostgreSQL
+#Crear una nueva instancia
+& "C:\Program Files\PostgreSQL\17\bin\initdb.exe" -D "C:\PostgreSQL\sgv_db_5435" --auth=trust --username=TI
+
+## Iniciar y detener una instancia de PostgreSQL
+# Iniciar el servidor
+pg_ctl start -D "C:\PostgreSQL\mnto_db_5433"
+
+# Detener el servidor
+pg_ctl stop -D "C:\PostgreSQL\mnto_db_5433"
+
+# Reiniciar el servidor
+pg_ctl restart -D "C:\PostgreSQL\mnto_db_5433"
+
+---
+
+## Configurar PostgreSQL como servicio en Windows (PowerShell)
+# Registrar una instancia como servicio
+pg_ctl register -N "PostgreSQL_5433" -D "C:\PostgreSQL\mnto_db_5433" -o "-p 5433"
+
+# Iniciar el servicio
+net start PostgreSQL_5433
+
+# Detener el servicio
+net stop PostgreSQL_5433
+
+# Eliminar el servicio
+pg_ctl unregister -N "PostgreSQL_5433"
+
+---
+
+## Acceso a PostgreSQL
+# Conectar a PostgreSQL con usuario y base de datos
+psql -p 5433 -U mnto -d postgres
+
+# Conectar a una base de datos específica
+psql -p 5433 -U mnto -d nombre_base_datos
+
+# Salir del cliente psql
+\q
+
+---
+
+## Consultas útiles dentro de psql
+# Ver usuarios y roles
+\du
+
+# Ver bases de datos
+\l
+
+# Cambiar entre bases de datos
+\c nombre_base_datos
+
+# Ver tablas dentro de una base de datos
+\dt
+
+# Ver la configuración actual de PostgreSQL
+SHOW ALL;
+
+---
+
+## Gestión de puertos y conexiones
+# Verificar puertos en uso (Windows)
+netstat -aon | findstr 5433
+
+# Ver conexiones activas en PostgreSQL
+SELECT * FROM pg_stat_activity;
+
+# Ver información del usuario actual
+SELECT current_user;
+
+---
+
+## Crear y administrar usuarios
+# Crear un usuario con contraseña
+CREATE ROLE nuevo_usuario WITH LOGIN PASSWORD 'contraseña';
+
+# Cambiar la contraseña de un usuario
+ALTER ROLE usuario EXISTENTE WITH PASSWORD 'nueva_contraseña';
+
+# Asignar privilegios de superusuario a un usuario
+ALTER ROLE nuevo_usuario WITH SUPERUSER;
+
+# Renombrar un usuario
+ALTER ROLE antiguo_usuario RENAME TO nuevo_usuario;
+
+# Eliminar un usuario
+DROP ROLE usuario;
+
+---
+
+## Gestión de bases de datos
+# Crear una base de datos
+CREATE DATABASE nombre_base_datos;
+
+# Cambiar el propietario de una base de datos
+ALTER DATABASE nombre_base_datos OWNER TO nuevo_propietario;
+
+# Eliminar una base de datos
+DROP DATABASE nombre_base_datos;
+
+---
+
+## Ver logs de PostgreSQL
+# Revisar el archivo de logs de PostgreSQL (si está configurado)
+tail -f "C:\PostgreSQL\mnto_db_5433\logfile.log"
+
